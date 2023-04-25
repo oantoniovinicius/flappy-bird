@@ -72,6 +72,13 @@ const flappyBird = { //drawing the bird itself
     height: 24,
     positionX: 10,
     positionY: 50,
+    gravity:0.15,
+    speed:0,
+
+    falling(){
+        flappyBird.speed = flappyBird.speed + flappyBird.gravity;
+        flappyBird.positionY = flappyBird.positionY + flappyBird.speed;
+    },
 
     draw: function() {
         context.drawImage(
@@ -85,6 +92,7 @@ const flappyBird = { //drawing the bird itself
 }
 
 function loop(){
+    flappyBird.falling();
     background.draw();
     floor.draw();
     flappyBird.draw();
