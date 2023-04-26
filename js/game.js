@@ -1,7 +1,10 @@
 console.log('Flappy Bird - Antonio Vinicius');
 
+const hitSound = new Audio();
+hitSound.src = '/resources/hit.wav'; 
+
 const sprites = new Image();
-sprites.src = '/img/sprites.png';
+sprites.src = '/resources/sprites.png';
 
 const canvas = document.querySelector('canvas');
 const context = canvas.getContext('2d');
@@ -34,7 +37,7 @@ const background = { //drawing de background
         background.width, background.height,
       );
     },
-};
+}
 
 const floor = { //drawing the floor
     spriteX: 0, //sortX
@@ -63,32 +66,57 @@ const floor = { //drawing the floor
         );
     }
     
-};
+}
 
-const flappyBird = { //drawing the bird itself
-    spriteX: 0, //sortX
-    spriteY: 0, //sortY
-    width: 33,
-    height: 24,
-    positionX: 10,
-    positionY: 50,
-    gravity:0.15,
-    speed:0,
+function collide(flappyBird, floor) {
+    const flappyBirdY = flappyBird.positionY + flappyBird.height;
+    const floorY = floor.positionY;
 
-    falling(){
-        flappyBird.speed = flappyBird.speed + flappyBird.gravity;
-        flappyBird.positionY = flappyBird.positionY + flappyBird.speed;
-    },
-
-    draw: function() {
-        context.drawImage(
-            sprites, //image
-            flappyBird.spriteX, flappyBird.spriteY, //sX and sY
-            flappyBird.width, flappyBird.height, //width and height of the first image(bird)
-            flappyBird.positionX, flappyBird.positionY, //initial position
-            flappyBird.width, flappyBird.height,
-        );
+    if(flappyBirdY >= floorY) {
+        return true;
     }
+
+    return false;
+}
+
+function createFlappyBird(){
+    const flappyBird = { //drawing the bird itself
+        spriteX: 0, //sortX
+        spriteY: 0, //sortY
+        width: 33,
+        height: 24,
+        positionX: 10,
+        positionY: 50,
+        gravity:0.15,
+        speed:0,
+        jump:4.6,
+    
+        falling(){
+            if(collide(flappyBird, floor)){
+                hitSound.play();
+                setTimeout(() => {
+                    changeScreen(screens.START);
+                },500);
+                return;
+            }
+            flappyBird.speed = flappyBird.speed + flappyBird.gravity;
+            flappyBird.positionY = flappyBird.positionY + flappyBird.speed;
+        },
+        jumping(){
+            console.log('devo pular');
+            flappyBird.speed = - flappyBird.jump;
+        },
+        draw: function() {
+            context.drawImage(
+                sprites, //image
+                flappyBird.spriteX, flappyBird.spriteY, //sX and sY
+                flappyBird.width, flappyBird.height, //width and height of the first image(bird)
+                flappyBird.positionX, flappyBird.positionY, //initial position
+                flappyBird.width, flappyBird.height,
+            );
+        }
+    }
+    return flappyBird;
 }
 
 const menuGetReady = {
@@ -108,21 +136,28 @@ const menuGetReady = {
             menuGetReady.width, menuGetReady.height
         );
     }
-};
+}
 
 //Screens
-
+const globals = {};
 let onScreen = {};
 function changeScreen(newScreen){
     onScreen = newScreen;
+    
+    if(onScreen.initialize){
+        onScreen.initialize();
+    }
 };
 
 const screens = {
     START:{
+        initialize(){
+            globals.flappyBird = createFlappyBird();
+        },
         draw(){
             background.draw();
             floor.draw();
-            flappyBird.draw();
+            globals.flappyBird.draw();
             menuGetReady.draw();
         },
         click(){
@@ -138,10 +173,13 @@ screens.game = {
     draw(){
         background.draw();
         floor.draw();
-        flappyBird.draw();
+        globals.flappyBird.draw();
+    },
+    click(){
+        globals.flappyBird.jumping();
     },
     update(){
-        flappyBird.falling();
+        globals.flappyBird.falling();
     }
 };
 function loop(){
