@@ -39,33 +39,43 @@ const background = { //drawing de background
     },
 }
 
-const floor = { //drawing the floor
-    spriteX: 0, //sortX
-    spriteY: 610, //sortY
-    width: 224,
-    height: 112,
-    positionX: 0,
-    positionY: canvas.height - 112,
-
-    draw: function() {
-        context.drawImage(
-            sprites, //image
-            floor.spriteX, floor.spriteY, //sX and sY
-            floor.width, floor.height, //width and height of the first image(bird)
-            floor.positionX, floor.positionY, //initial position
-            floor.width, floor.height,
-        );
-
-        //completing the image
-        context.drawImage(
-            sprites, //image
-            floor.spriteX, floor.spriteY, //sX and sY
-            floor.width, floor.height, //width and height of the first image(bird)
-            (floor.positionX + floor.width), floor.positionY, //initial position
-            floor.width, floor.height,
-        );
-    }
+function createFloor(){
+    const floor = { //drawing the floor
+        spriteX: 0, //sortX
+        spriteY: 610, //sortY
+        width: 224,
+        height: 112,
+        positionX: 0,
+        positionY: canvas.height - 112,
     
+        movement(){
+            const floorMovement = 1;
+            const repeat = floor.width / 2;
+            const floorRepeat = floor.positionX - floorMovement;
+
+            floor.positionX = floorRepeat % repeat;
+        },
+        draw: function() {
+            context.drawImage(
+                sprites, //image
+                floor.spriteX, floor.spriteY, //sX and sY
+                floor.width, floor.height, //width and height of the first image(bird)
+                floor.positionX, floor.positionY, //initial position
+                floor.width, floor.height,
+            );
+    
+            //completing the image
+            context.drawImage(
+                sprites, //image
+                floor.spriteX, floor.spriteY, //sX and sY
+                floor.width, floor.height, //width and height of the first image(bird)
+                (floor.positionX + floor.width), floor.positionY, //initial position
+                floor.width, floor.height,
+            ); 
+        }
+
+    }
+    return floor;
 }
 
 function collide(flappyBird, floor) {
@@ -92,7 +102,7 @@ function createFlappyBird(){
         jump:4.6,
     
         falling(){
-            if(collide(flappyBird, floor)){
+            if(collide(flappyBird, globals.floor)){
                 hitSound.play();
                 setTimeout(() => {
                     changeScreen(screens.START);
@@ -103,7 +113,7 @@ function createFlappyBird(){
             flappyBird.positionY = flappyBird.positionY + flappyBird.speed;
         },
         jumping(){
-            console.log('devo pular');
+            console.log('pulei');
             flappyBird.speed = - flappyBird.jump;
         },
         draw: function() {
@@ -153,18 +163,19 @@ const screens = {
     START:{
         initialize(){
             globals.flappyBird = createFlappyBird();
+            globals.floor = createFloor();
         },
         draw(){
             background.draw();
-            floor.draw();
             globals.flappyBird.draw();
+            globals.floor.draw();
             menuGetReady.draw();
         },
         click(){
             changeScreen(screens.game);
         },
         update(){
-
+            globals.floor.movement();
         }
     }
 };
@@ -172,13 +183,14 @@ const screens = {
 screens.game = {
     draw(){
         background.draw();
-        floor.draw();
+        globals.floor.draw();
         globals.flappyBird.draw();
     },
     click(){
         globals.flappyBird.jumping();
     },
     update(){
+        globals.floor.movement();
         globals.flappyBird.falling();
     }
 };
