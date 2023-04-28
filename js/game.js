@@ -3,6 +3,8 @@ console.log('Flappy Bird - Antonio Vinicius');
 const hitSound = new Audio();
 hitSound.src = '/resources/hit.wav'; 
 
+let frames = 0;
+
 const sprites = new Image();
 sprites.src = '/resources/sprites.png';
 
@@ -116,10 +118,30 @@ function createFlappyBird(){
             console.log('pulei');
             flappyBird.speed = - flappyBird.jump;
         },
+        movements: [
+            { spriteX: 0, spriteY: 0, }, 
+            { spriteX: 0, spriteY: 26, }, 
+            { spriteX: 0, spriteY: 52, }, 
+            { spriteX: 0, spriteY: 26, }, 
+        ],
+        currentFrame:0,
+        updateFrame(){
+            const framesBreak = 10;
+            const passedBreak = frames % framesBreak === 0;
+            
+            if(passedBreak){
+                const aux = 1;
+                const increment = aux + flappyBird.currentFrame;
+                const repeatBase = flappyBird.movements.length;
+                flappyBird.currentFrame = increment % repeatBase;
+            }
+        },
         draw: function() {
+            flappyBird.updateFrame();
+            const { spriteX, spriteY } = flappyBird.movements[flappyBird.currentFrame];
             context.drawImage(
                 sprites, //image
-                flappyBird.spriteX, flappyBird.spriteY, //sX and sY
+                spriteX, spriteY, //sX and sY
                 flappyBird.width, flappyBird.height, //width and height of the first image(bird)
                 flappyBird.positionX, flappyBird.positionY, //initial position
                 flappyBird.width, flappyBird.height,
@@ -197,6 +219,8 @@ screens.game = {
 function loop(){
     onScreen.draw();
     onScreen.update();
+
+    frames += 1;
 
     requestAnimationFrame(loop);
 };
