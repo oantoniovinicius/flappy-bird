@@ -168,7 +168,7 @@ function createPipes(){
             //[Pipe in the sky]
             pipes.pairs.forEach(function(pair){
                 const randomY = pair.y;
-                const between = 90;
+                const between = 100;
 
                 const pipeSkyX = pair.x;
                 const pipeSkyY = randomY;
@@ -202,6 +202,22 @@ function createPipes(){
             })
             
         },
+        collideFlappyBird(pair) {
+            const headFlappy = globals.flappyBird.positionY;
+            const feetFlappy = globals.flappyBird.positionY + globals.flappyBird.height;
+            
+            if((globals.flappyBird.positionX + globals.flappyBird.width) >= pair.x) {
+              console.log('bateu o cano')
+              if(headFlappy <= pair.pipeSky.y) {
+                return true;
+              }
+      
+              if(feetFlappy >= pair.pipeFloor.y) {
+                return true;
+              }
+            }
+            return false;
+          },
         pairs: [],
         update(){
             const framesPassed = frames % 100 === 0;
@@ -214,6 +230,15 @@ function createPipes(){
 
             pipes.pairs.forEach(function(pair){
                 pair.x = pair.x - 2;
+
+                if(pipes.collideFlappyBird(pair)) {
+                    console.log('Você perdeu!')
+                    hitSound.play();
+                    
+                    setTimeout(() => {
+                        changeScreen(screens.START);
+                    },200);
+                  }
 
                 if(pair.x + pipes.width <= 0){
                     pipes.pairs.shift();
