@@ -151,6 +151,80 @@ function createFlappyBird(){
     return flappyBird;
 }
 
+function createPipes(){
+    const pipes ={  
+        width: 52,
+        height: 400,
+        floor: { //pipe on the floor
+            spriteX: 0,
+            spriteY: 169,
+        },
+        sky: { //pipe in the sky
+            spriteX: 52,
+            spriteY: 169,
+        },
+        space: 80,
+        draw() { 
+            //[Pipe in the sky]
+            pipes.pairs.forEach(function(pair){
+                const randomY = pair.y;
+                const between = 90;
+
+                const pipeSkyX = pair.x;
+                const pipeSkyY = randomY;
+                context.drawImage(
+                    sprites,
+                    pipes.sky.spriteX, pipes.sky.spriteY,
+                    pipes.width, pipes.height,
+                    pipeSkyX, pipeSkyY,
+                    pipes.width, pipes.height,
+                )
+    
+                //[Pipe on the floor]
+                const pipeFloorX = pair.x;
+                const pipeFloorY = pipes.height + between + randomY;
+                context.drawImage(
+                    sprites,
+                    pipes.floor.spriteX, pipes.floor.spriteY,
+                    pipes.width, pipes.height,
+                    pipeFloorX, pipeFloorY,
+                    pipes.width, pipes.height,
+                )
+
+                pair.pipeSky = {
+                    x: pipeSkyX,
+                    y: pipes.height + pipeSkyY
+                  }
+                pair.pipeFloor = {
+                    x: pipeFloorX,
+                    y: pipeFloorY
+                  }
+            })
+            
+        },
+        pairs: [],
+        update(){
+            const framesPassed = frames % 100 === 0;
+            if(framesPassed) {
+                pipes.pairs.push({
+                    x: canvas.width,
+                    y: -150 * (Math.random() + 1),
+                });
+            }
+
+            pipes.pairs.forEach(function(pair){
+                pair.x = pair.x - 2;
+
+                if(pair.x + pipes.width <= 0){
+                    pipes.pairs.shift();
+                }
+            });
+        }
+    }
+
+    return pipes;
+}
+
 const menuGetReady = {
     sortX: 134,
     sortY: 0,
@@ -186,12 +260,13 @@ const screens = {
         initialize(){
             globals.flappyBird = createFlappyBird();
             globals.floor = createFloor();
+            globals.pipes = createPipes();    
         },
         draw(){
             background.draw();
             globals.flappyBird.draw();
-            globals.floor.draw();
             menuGetReady.draw();
+            globals.floor.draw();
         },
         click(){
             changeScreen(screens.game);
@@ -205,14 +280,16 @@ const screens = {
 screens.game = {
     draw(){
         background.draw();
-        globals.floor.draw();
         globals.flappyBird.draw();
+        globals.pipes.draw();
+        globals.floor.draw();
     },
     click(){
         globals.flappyBird.jumping();
     },
     update(){
         globals.floor.movement();
+        globals.pipes.update();
         globals.flappyBird.falling();
     }
 };
