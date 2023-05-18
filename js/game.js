@@ -2,8 +2,13 @@ console.log('Flappy Bird - Antonio Vinicius');
 
 const hitSound = new Audio();
 hitSound.src = '/resources/hit.wav'; 
+const jumpSound = new Audio();
+jumpSound.src = '/resources/jump.wav'; 
 
 let frames = 0;
+let birdFall = false;
+let birdCrash = false;
+let highScore = 0;
 
 const sprites = new Image();
 sprites.src = '/resources/sprites.png';
@@ -95,28 +100,27 @@ function createFlappyBird(){
     const flappyBird = { //drawing the bird itself
         spriteX: 0, //sortX
         spriteY: 0, //sortY
-        width: 33,
-        height: 24,
+        width: 32,
+        height: 23,
         positionX: 10,
         positionY: 50,
         gravity:0.15,
         speed:0,
-        jump:4.6,
+        jump:4.4,
     
         falling(){
             if(collide(flappyBird, globals.floor)){
                 hitSound.play();
-                setTimeout(() => {
-                    changeScreen(screens.START);
-                },500);
+                birdFall = true;
+                changeScreen(screens.gameOver);
                 return;
             }
             flappyBird.speed = flappyBird.speed + flappyBird.gravity;
             flappyBird.positionY = flappyBird.positionY + flappyBird.speed;
         },
         jumping(){
-            console.log('pulei');
             flappyBird.speed = - flappyBird.jump;
+            jumpSound.play();
         },
         movements: [
             { spriteX: 0, spriteY: 0, }, 
@@ -163,7 +167,7 @@ function createPipes(){
             spriteX: 52,
             spriteY: 169,
         },
-        space: 80,
+        space: 90,
         draw() { 
             //[Pipe in the sky]
             pipes.pairs.forEach(function(pair){
@@ -206,7 +210,7 @@ function createPipes(){
             const headFlappy = globals.flappyBird.positionY;
             const feetFlappy = globals.flappyBird.positionY + globals.flappyBird.height;
             
-            if((globals.flappyBird.positionX + globals.flappyBird.width) >= pair.x) {
+            if((globals.flappyBird.positionX + globals.flappyBird.width) > pair.x) {
               console.log('bateu o cano')
               if(headFlappy <= pair.pipeSky.y) {
                 return true;
@@ -233,12 +237,10 @@ function createPipes(){
 
                 if(pipes.collideFlappyBird(pair)) {
                     console.log('Você perdeu!')
+                    birdCrash = true;
                     hitSound.play();
-                    
-                    setTimeout(() => {
-                        changeScreen(screens.START);
-                    },200);
-                  }
+                    changeScreen(screens.gameOver);
+                }
 
                 if(pair.x + pipes.width <= 0){
                     pipes.pairs.shift();
@@ -268,6 +270,134 @@ const menuGetReady = {
         );
     }
 }
+const menuGameOver = {
+    sortX: 134,
+    sortY: 153,
+    width: 226,
+    height: 200,
+    positionX: (canvas.width/2) - 226/2,
+    positionY:50,
+
+    draw(){
+        context.drawImage(
+            sprites,
+            menuGameOver.sortX, menuGameOver.sortY,
+            menuGameOver.width, menuGameOver.height,
+            menuGameOver.positionX, menuGameOver.positionY,
+            menuGameOver.width, menuGameOver.height,
+        );
+        globals.score.drawHighScore(); // Desenha o highScore
+    }
+}
+
+
+const bronzeCoin = {
+        sortX: 48,
+        sortY: 124,
+        width: 44,
+        height: 44,
+        positionX: 72,
+        positionY: 138,
+        draw(){
+            context.drawImage(
+                sprites,
+                bronzeCoin.sortX, bronzeCoin.sortY,
+                bronzeCoin.width, bronzeCoin.height,
+                bronzeCoin.positionX, bronzeCoin.positionY,
+                bronzeCoin.width, bronzeCoin.height
+            );
+        }
+    }
+const silverCoin = {
+    sortX: 47,
+    sortY: 78,
+    width: 44,
+    height: 44,
+    positionX: 72,
+    positionY: 138,
+    draw(){
+        context.drawImage(
+            sprites,
+            silverCoin.sortX, silverCoin.sortY,
+            silverCoin.width, silverCoin.height,
+            silverCoin.positionX, silverCoin.positionY,
+            silverCoin.width, silverCoin.height
+        );
+    }
+}
+const goldCoin = {
+    sortX: 0,
+    sortY: 124,
+    width: 44,
+    height: 44,
+    positionX: 72,
+    positionY: 138,
+    draw(){
+        context.drawImage(
+            sprites,
+            goldCoin.sortX, goldCoin.sortY,
+            goldCoin.width, goldCoin.height,
+            goldCoin.positionX, goldCoin.positionY,
+            goldCoin.width, goldCoin.height
+        );
+    }
+}
+
+
+function createScore(){
+    const score = {
+        initialScore: 0, 
+        finalScore: 0,
+        draw(){
+            context.font = '35px vt323';
+            context.fillStyle = 'white';
+            context.strokeStyle = 'black';
+            context.lineWidth = 3; //
+            const scoreText = `Score: ${score.initialScore}`;
+            const x = 10;
+            const y = 35;
+            context.strokeText(scoreText, x, y);
+            context.fillText(scoreText, x, y);
+        },
+        drawFinalScore(){
+            context.font = '30px vt323';
+            context.fillStyle = '#faaa09';
+            context.strokeStyle = '#cd993c';
+            context.lineWidth = 3; //
+            const finalScoreText = `${score.finalScore}`;
+            const x = 218;
+            const y = 145;
+            context.strokeText(finalScoreText, x, y);
+            context.fillText(finalScoreText, x, y);
+        },
+        update(){
+            const framesBreak = 10;
+            const framesPassed = frames % framesBreak === 0;
+            
+            if (framesPassed){
+                score.initialScore = score.initialScore + 1;
+            }
+            if(birdCrash == true || birdFall == true){
+                score.finalScore = score.initialScore;
+            }
+            if (score.finalScore > highScore) {
+                highScore = score.finalScore;
+            }
+        },
+        drawHighScore(){
+            context.font = '30px vt323';
+            context.fillStyle = '#faaa09';
+            context.strokeStyle = '#cd993c';
+            context.lineWidth = 3; //
+            const highScoreText = `${highScore}`;
+            const x = 218;
+            const y = 185;
+            context.strokeText(highScoreText, x, y);
+            context.fillText(highScoreText, x, y);
+        }
+    }
+    return score;
+}
 
 //Screens
 const globals = {};
@@ -283,8 +413,8 @@ function changeScreen(newScreen){
 const screens = {
     START:{
         initialize(){
-            globals.flappyBird = createFlappyBird();
             globals.floor = createFloor();
+            globals.flappyBird = createFlappyBird();
             globals.pipes = createPipes();    
         },
         draw(){
@@ -303,11 +433,15 @@ const screens = {
 };
 
 screens.game = {
+    initialize(){
+        globals.score = createScore();
+    },
     draw(){
         background.draw();
-        globals.flappyBird.draw();
         globals.pipes.draw();
         globals.floor.draw();
+        globals.flappyBird.draw();
+        globals.score.draw();
     },
     click(){
         globals.flappyBird.jumping();
@@ -316,14 +450,39 @@ screens.game = {
         globals.floor.movement();
         globals.pipes.update();
         globals.flappyBird.falling();
+        globals.score.update();
+    }
+};
+screens.gameOver = {
+    draw(){
+        background.draw();
+        globals.pipes.draw();
+        globals.floor.draw();
+        globals.flappyBird.draw();
+        menuGameOver.draw();
+        globals.score.drawFinalScore();
+        globals.score.drawHighScore();
+
+        if(globals.score.finalScore>100){
+            goldCoin.draw();
+        } 
+        if (globals.score.finalScore>50 && globals.score.finalScore<100){
+            silverCoin.draw();
+        } 
+        if (globals.score.finalScore>1 && globals.score.finalScore<50){
+            bronzeCoin.draw()
+        }
+    },
+    click(){
+        changeScreen(screens.START);
+    },
+    update(){
     }
 };
 function loop(){
     onScreen.draw();
     onScreen.update();
-
     frames += 1;
-
     requestAnimationFrame(loop);
 };
 
