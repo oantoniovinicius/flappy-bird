@@ -510,10 +510,10 @@ screens.gameOver = {
     globals.score.drawFinalScore();
     globals.score.drawHighScore();
 
-    if (globals.score.finalScore > 100) {
+    if (globals.score.finalScore >= 100) {
       goldCoin.draw();
     }
-    if (globals.score.finalScore > 50 && globals.score.finalScore < 100) {
+    if (globals.score.finalScore >= 50 && globals.score.finalScore < 100) {
       silverCoin.draw();
     }
     if (globals.score.finalScore > 1 && globals.score.finalScore < 50) {
