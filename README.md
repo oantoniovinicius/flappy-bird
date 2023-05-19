@@ -10,7 +10,7 @@ lógica pode ser aplicada para desenvolver outras aplicações do mesmo tipo.
 - Tela de fim de jogo (Menu GameOver) com armazenamento de pontos feitos (score e highScore);
 - Efeitos sonoros de colisão e pulo
 
-# Jogo em execução
+## Jogo em execução
 ![Layout](https://github.com/oantoniovinicius/flappy-bird/blob/main/resources/flappyBirdGif.gif)
 
 - OBS: GIF com qualidade reduziza :)
