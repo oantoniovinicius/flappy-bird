@@ -1,12 +1,12 @@
-#game-canvas{
-    border: 1px solid #000;
-    display: block;
-    margin: 0 auto;
+#game-canvas {
+  border: 1px solid #000;
+  display: block;
+  margin: 0 auto;
 }
 body {
-    background-image: linear-gradient(to bottom, white, rgb(165, 204, 222));
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+  background-image: linear-gradient(to bottom, white, rgb(165, 204, 222));
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
